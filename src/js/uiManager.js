@@ -339,6 +339,78 @@ export class UIManager {
     }
   }
 
+  showAddResourceModal() {
+    const modal = this.createModal('Add New Resource', `
+      <form id="addResourceForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Resource Name *</label>
+          <input type="text" id="resourceName" class="input-field" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Assigned Projects</label>
+          <select multiple id="assignedProjects" class="input-field h-32">
+            ${this.getProjectOptionsForModal()}
+          </select>
+          <div class="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple projects</div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <textarea id="resourceDescription" class="input-field" rows="3"></textarea>
+        </div>
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="btn-secondary" onclick="uiManager.closeModal('addResource')">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Add Resource
+          </button>
+        </div>
+      </form>
+    `);
+
+    modal.querySelector('#addResourceForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('resourceName').value.trim();
+      const description = document.getElementById('resourceDescription').value.trim();
+      const assignedSelect = document.getElementById('assignedProjects');
+      const assignedProjects = Array.from(assignedSelect.selectedOptions).map(option => option.value);
+
+      if (!name) {
+        this.showToast('Resource name is required', 'error');
+        return;
+      }
+
+      window.stateManager.addResource({
+        'Resource Name': name,
+        'Assigned Projects': assignedProjects.join(', '),
+        'Description': description
+      });
+
+      this.renderResourcesTable();
+      this.closeModal('addResource');
+      this.showToast('Resource added successfully', 'success');
+    });
+
+    this.showModal('addResource', modal);
+  }
+
+  getProjectOptionsForModal() {
+    const projects = window.stateManager.getProjects();
+    return projects.map(project => {
+      const projectName = project['Project Name'];
+      return `<option value="${this.escapeHtml(projectName)}">${this.escapeHtml(projectName)}</option>`;
+    }).join('');
+  }
+
+  deleteResource(index) {
+    if (confirm('Are you sure you want to delete this resource?')) {
+      window.stateManager.deleteResource(index);
+      this.renderResourcesTable();
+      this.showToast('Resource deleted successfully', 'success');
+    }
+  }
+
   // Productivity Module
   setupProductivityListeners() {
     const projectSelect = document.getElementById('productivityProjectSelect');
