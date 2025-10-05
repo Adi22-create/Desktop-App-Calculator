@@ -1,11 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import { fileURLToPath } from 'url';
-import path from 'path';
-import Store from 'electron-store';
-import fs from 'fs';
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const Store = require('electron-store');
+const fs = require('fs');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = __dirname;
 
 // Initialize electron store for state persistence
 const store = new Store();
