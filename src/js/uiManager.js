@@ -1,3 +1,5 @@
+import Papa from 'papaparse';
+
 export class UIManager {
   constructor() {
     this.modals = new Map();
