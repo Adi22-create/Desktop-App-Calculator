@@ -179,7 +179,13 @@ ipcMain.handle('show-save-dialog', async (event, options) => {
 });
 
 ipcMain.handle('show-open-dialog', async (event, options) => {
-  const { dialog } = await import('electron');
+  const { dialog } = require('electron');
   const result = await dialog.showOpenDialog(mainWindow, options);
+  return result;
+});
+
+ipcMain.handle('show-save-dialog', async (event, options) => {
+  const { dialog } = require('electron');
+  const result = await dialog.showSaveDialog(mainWindow, options);
   return result;
 });
