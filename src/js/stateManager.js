@@ -1,4 +1,4 @@
-export class StateManager {
+class StateManager {
   constructor() {
     this.electronAPI = window.electronAPI;
     this.state = {
