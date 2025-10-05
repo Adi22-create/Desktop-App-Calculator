@@ -1,7 +1,4 @@
-import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
-
-export class CSVManager {
+class CSVManager {
   constructor() {
     this.electronAPI = window.electronAPI;
   }
