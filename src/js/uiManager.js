@@ -502,6 +502,83 @@ export class UIManager {
     });
   }
 
+  showAddProductivityModal() {
+    const projectSelect = document.getElementById('productivityProjectSelect');
+    const selectedProject = projectSelect ? projectSelect.value : '';
+    
+    if (!selectedProject) {
+      this.showToast('Please select a project first', 'error');
+      return;
+    }
+
+    const modal = this.createModal('Add Productivity Mapping', `
+      <form id="addProductivityForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Project</label>
+          <input type="text" value="${this.escapeHtml(selectedProject)}" class="input-field bg-gray-100" readonly>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Productivity Value *</label>
+          <input type="number" id="productivityValue" class="input-field" min="1" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Rate ($) *</label>
+          <div class="relative">
+            <span class="absolute left-3 top-2 text-gray-500">$</span>
+            <input type="number" id="productivityRate" class="input-field pl-8" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="btn-secondary" onclick="uiManager.closeModal('addProductivity')">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Add Mapping
+          </button>
+        </div>
+      </form>
+    `);
+
+    modal.querySelector('#addProductivityForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const productivity = document.getElementById('productivityValue').value;
+      const rate = document.getElementById('productivityRate').value;
+
+      if (!productivity || !rate) {
+        this.showToast('All fields are required', 'error');
+        return;
+      }
+
+      // Check for duplicate productivity value for this project
+      const existing = window.stateManager.getProductivityForProject(selectedProject);
+      if (existing.find(p => p['Productivity Value'] == productivity)) {
+        this.showToast('Productivity value already exists for this project', 'error');
+        return;
+      }
+
+      window.stateManager.addProductivity({
+        'Project Name': selectedProject,
+        'Productivity Value': productivity,
+        'Rate': rate
+      });
+
+      this.renderProductivityTable();
+      this.closeModal('addProductivity');
+      this.showToast('Productivity mapping added successfully', 'success');
+    });
+
+    this.showModal('addProductivity', modal);
+  }
+
+  deleteProductivity(index) {
+    if (confirm('Are you sure you want to delete this productivity mapping?')) {
+      window.stateManager.deleteProductivity(index);
+      this.renderProductivityTable();
+      this.showToast('Productivity mapping deleted successfully', 'success');
+    }
+  }
+
   async saveProductivity() {
     const success = await window.stateManager.saveProductivity();
     if (success) {
