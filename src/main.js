@@ -3,8 +3,6 @@ const path = require('path');
 const Store = require('electron-store');
 const fs = require('fs');
 
-const __dirname = __dirname;
-
 // Initialize electron store for state persistence
 const store = new Store();
 
