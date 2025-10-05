@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Electron desktop application for project management and productivity tracking",
   "main": "src/main.js",
-  "type": "module",
   "scripts": {
     "start": "electron . --no-sandbox",
     "dev": "concurrently \"npm run build:css:watch\" \"electron . --no-sandbox\"",
