@@ -993,6 +993,231 @@ export class UIManager {
     }
   }
 
+  showBulkUploadModal(module) {
+    const modal = this.createModal(`Bulk Upload ${module.charAt(0).toUpperCase() + module.slice(1)}`, `
+      <form id="bulkUploadForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Upload CSV/Excel File</label>
+          <input type="file" id="uploadFile" class="input-field" accept=".csv,.xlsx,.xls" required>
+          <div class="text-sm text-gray-500 mt-1">Supported formats: CSV, Excel (.xlsx, .xls)</div>
+        </div>
+        <div id="previewContainer" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Preview (First 10 rows)</label>
+          <div class="border rounded-lg p-4 max-h-64 overflow-auto">
+            <div id="previewTable"></div>
+          </div>
+        </div>
+        <div id="validationErrors" class="hidden">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 class="text-red-800 font-medium mb-2">Validation Errors:</h4>
+            <ul id="errorsList" class="text-red-700 text-sm space-y-1"></ul>
+          </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="btn-secondary" onclick="uiManager.closeModal('bulkUpload')">
+            Cancel
+          </button>
+          <button type="button" id="previewBtn" class="btn-secondary">
+            <i class="fas fa-eye"></i>
+            Preview
+          </button>
+          <button type="submit" id="uploadBtn" class="btn-primary" disabled>
+            <i class="fas fa-upload"></i>
+            Upload Data
+          </button>
+        </div>
+      </form>
+    `);
+
+    const fileInput = modal.querySelector('#uploadFile');
+    const previewBtn = modal.querySelector('#previewBtn');
+    const uploadBtn = modal.querySelector('#uploadBtn');
+    let uploadData = null;
+
+    fileInput.addEventListener('change', () => {
+      uploadBtn.disabled = true;
+      document.getElementById('previewContainer').classList.add('hidden');
+      document.getElementById('validationErrors').classList.add('hidden');
+    });
+
+    previewBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        this.showToast('Please select a file', 'error');
+        return;
+      }
+
+      try {
+        const data = await window.csvManager.parseUploadedFile(file);
+        const validation = this.validateBulkUploadData(data, module);
+        
+        // Show preview
+        this.showBulkUploadPreview(data.slice(0, 10), module);
+        
+        if (validation.valid) {
+          uploadBtn.disabled = false;
+          uploadData = data;
+          document.getElementById('validationErrors').classList.add('hidden');
+        } else {
+          uploadBtn.disabled = true;
+          this.showValidationErrors(validation.errors);
+        }
+        
+        document.getElementById('previewContainer').classList.remove('hidden');
+      } catch (error) {
+        this.showToast('Error parsing file: ' + error.message, 'error');
+      }
+    });
+
+    modal.querySelector('#bulkUploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!uploadData) {
+        this.showToast('Please preview the data first', 'error');
+        return;
+      }
+
+      const success = await this.processBulkUpload(uploadData, module);
+      if (success) {
+        this.closeModal('bulkUpload');
+        this.showToast(`${module} data uploaded successfully`, 'success');
+        this.refreshTabData(module);
+      }
+    });
+
+    this.showModal('bulkUpload', modal);
+  }
+
+  validateBulkUploadData(data, module) {
+    const requiredFields = {
+      'projects': ['Project Name'],
+      'resources': ['Resource Name'],
+      'productivity': ['Project Name', 'Productivity Value', 'Rate']
+    };
+
+    const fields = requiredFields[module] || [];
+    return window.csvManager.validateCSVData(data, fields);
+  }
+
+  showBulkUploadPreview(data, module) {
+    const container = document.getElementById('previewTable');
+    if (!container || data.length === 0) return;
+
+    const headers = Object.keys(data[0]);
+    let html = '<table class="table"><thead><tr>';
+    
+    headers.forEach(header => {
+      html += `<th>${this.escapeHtml(header)}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    data.forEach(row => {
+      html += '<tr>';
+      headers.forEach(header => {
+        html += `<td>${this.escapeHtml(row[header] || '')}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  showValidationErrors(errors) {
+    const container = document.getElementById('errorsList');
+    if (!container) return;
+
+    container.innerHTML = '';
+    errors.forEach(error => {
+      const li = document.createElement('li');
+      li.textContent = error;
+      container.appendChild(li);
+    });
+
+    document.getElementById('validationErrors').classList.remove('hidden');
+  }
+
+  async processBulkUpload(data, module) {
+    try {
+      switch (module) {
+        case 'projects':
+          return await window.csvManager.mergeCSV('projects.csv', data, 'Project Name');
+        case 'resources':
+          return await window.csvManager.mergeCSV('resources.csv', data, 'Resource Name');
+        case 'productivity':
+          // For productivity, we need to ensure project exists
+          const validData = data.filter(row => {
+            const project = window.stateManager.getProjects().find(p => p['Project Name'] === row['Project Name']);
+            return project !== undefined;
+          });
+          return await window.csvManager.mergeCSV('productivity.csv', validData, 'Project Name,Productivity Value');
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error('Error processing bulk upload:', error);
+      return false;
+    }
+  }
+
+  async exportCalculatorHistory() {
+    try {
+      const history = window.stateManager.getCalculatorHistory();
+      if (history.length === 0) {
+        this.showToast('No calculation history to export', 'warning');
+        return;
+      }
+
+      const csv = Papa.unparse(history);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `calculator_history_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      this.showToast('Calculator history exported successfully', 'success');
+    } catch (error) {
+      console.error('Error exporting calculator history:', error);
+      this.showToast('Error exporting calculator history', 'error');
+    }
+  }
+
+  async exportMasterView() {
+    try {
+      const masterData = window.stateManager.getMaster();
+      if (masterData.length === 0) {
+        this.showToast('No master data to export', 'warning');
+        return;
+      }
+
+      const csv = Papa.unparse(masterData);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `master_database_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      this.showToast('Master database exported successfully', 'success');
+    } catch (error) {
+      console.error('Error exporting master view:', error);
+      this.showToast('Error exporting master view', 'error');
+    }
+  }
+
+  editMasterRow(index) {
+    // Since master database is derived, we need to find the source data
+    this.showToast('Master database is read-only. Edit data in Projects, Resources, or Productivity sections.', 'warning');
+  }
+
   escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
