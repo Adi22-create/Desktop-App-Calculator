@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@tailwind base;
+@tailwind components; 
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center gap-2;
+  }
+  
+  .btn-danger {
+    @apply bg-danger text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 flex items-center gap-2;
+  }
+  
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors duration-200;
+  }
+  
+  .nav-item.active {
+    @apply bg-primary text-white;
+  }
+  
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+  
+  .table {
+    @apply w-full border-collapse;
+  }
+  
+  .table th {
+    @apply bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-gray-900 border-b;
+  }
+  
+  .table td {
+    @apply px-4 py-3 text-sm text-gray-700 border-b;
+  }
+  
+  .toast {
+    @apply fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg text-white z-50;
+  }
+  
+  .toast.success {
+    @apply bg-success;
+  }
+  
+  .toast.error {
+    @apply bg-danger;
+  }
+  
+  .toast.warning {
+    @apply bg-yellow-500;
+  }
+  
+  /* Hide scrollbars */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

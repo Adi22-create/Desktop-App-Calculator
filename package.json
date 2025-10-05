@@ -1,0 +1,41 @@
+{
+  "name": "desktop-app-calculator",
+  "version": "1.0.0",
+  "description": "Electron desktop application for project management and productivity tracking",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run build:css:watch\" \"electron .\"",
+    "build:css": "tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --minify",
+    "build:css:watch": "tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --watch",
+    "build": "npm run build:css && electron-builder",
+    "dist": "electron-builder"
+  },
+  "keywords": ["electron", "desktop", "productivity", "csv", "data-management"],
+  "author": "Desktop App Calculator",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4",
+    "tailwindcss": "^3.3.5",
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "papaparse": "^5.4.1",
+    "xlsx": "^0.18.5"
+  },
+  "build": {
+    "appId": "com.desktop-app-calculator.app",
+    "productName": "Desktop App Calculator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "data/**/*",
+      "node_modules/**/*"
+    ]
+  }
+}
