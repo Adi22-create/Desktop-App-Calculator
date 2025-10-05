@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desktop App Calculator</title>
+  <link rel="stylesheet" href="styles/output.css">
+</head>
+<body class="font-inter bg-gray-50 overflow-hidden">
+  <div id="app" class="flex h-screen">
+    <!-- Left Sidebar Navigation -->
+    <nav id="sidebar" class="w-64 bg-white shadow-lg flex flex-col">
+      <div class="p-6 border-b">
+        <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-calculator text-primary"></i>
+          Desktop Calculator
+        </h1>
+      </div>
+      
+      <div class="flex-1 p-4">
+        <ul class="space-y-2">
+          <li>
+            <button data-testid="nav-projects" class="nav-item w-full" data-tab="projects">
+              <i class="fas fa-project-diagram"></i>
+              <span>Projects</span>
+            </button>
+          </li>
+          <li>
+            <button data-testid="nav-resources" class="nav-item w-full" data-tab="resources">
+              <i class="fas fa-users"></i>
+              <span>Resources</span>
+            </button>
+          </li>
+          <li>
+            <button data-testid="nav-productivity" class="nav-item w-full" data-tab="productivity">
+              <i class="fas fa-chart-line"></i>
+              <span>Productivity Mapping</span>
+            </button>
+          </li>
+          <li>
+            <button data-testid="nav-master" class="nav-item w-full" data-tab="master">
+              <i class="fas fa-database"></i>
+              <span>Master Database</span>
+            </button>
+          </li>
+          <li>
+            <button data-testid="nav-calculator" class="nav-item w-full" data-tab="calculator">
+              <i class="fas fa-calculator"></i>
+              <span>Calculator</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="p-4 border-t">
+        <button data-testid="export-all-btn" id="exportAllBtn" class="btn-success w-full justify-center">
+          <i class="fas fa-download"></i>
+          Export All Data
+        </button>
+      </div>
+    </nav>
+    
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <!-- Tab Content Container -->
+      <div id="tabContent" class="flex-1 overflow-auto">
+        <!-- Projects Tab -->
+        <div id="projects-tab" class="tab-content hidden p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Projects Management</h2>
+              <div class="flex gap-3">
+                <button data-testid="add-project-btn" id="addProjectBtn" class="btn-primary">
+                  <i class="fas fa-plus"></i>
+                  Add New Project
+                </button>
+                <button data-testid="bulk-upload-projects-btn" id="bulkUploadProjectsBtn" class="btn-secondary">
+                  <i class="fas fa-upload"></i>
+                  Bulk Upload
+                </button>
+                <button data-testid="save-projects-btn" id="saveProjectsBtn" class="btn-success">
+                  <i class="fas fa-save"></i>
+                  Save All
+                </button>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="projectsTableBody">
+                    <!-- Projects will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resources Tab -->
+        <div id="resources-tab" class="tab-content hidden p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Resources Management</h2>
+              <div class="flex gap-3">
+                <button data-testid="add-resource-btn" id="addResourceBtn" class="btn-primary">
+                  <i class="fas fa-plus"></i>
+                  Add New Resource
+                </button>
+                <button data-testid="bulk-upload-resources-btn" id="bulkUploadResourcesBtn" class="btn-secondary">
+                  <i class="fas fa-upload"></i>
+                  Bulk Upload
+                </button>
+                <button data-testid="save-resources-btn" id="saveResourcesBtn" class="btn-success">
+                  <i class="fas fa-save"></i>
+                  Save All
+                </button>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Project</label>
+              <select data-testid="project-filter" id="projectFilter" class="input-field max-w-xs">
+                <option value="">All Projects</option>
+              </select>
+            </div>
+            
+            <div class="card">
+              <div class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Resource Name</th>
+                      <th>Assigned Projects</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resourcesTableBody">
+                    <!-- Resources will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Productivity Tab -->
+        <div id="productivity-tab" class="tab-content hidden p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Productivity Mapping</h2>
+              <div class="flex gap-3">
+                <select data-testid="productivity-project-select" id="productivityProjectSelect" class="input-field max-w-xs">
+                  <option value="">Select Project</option>
+                </select>
+                <button data-testid="add-productivity-btn" id="addProductivityBtn" class="btn-primary">
+                  <i class="fas fa-plus"></i>
+                  Add Row
+                </button>
+                <button data-testid="bulk-upload-productivity-btn" id="bulkUploadProductivityBtn" class="btn-secondary">
+                  <i class="fas fa-upload"></i>
+                  Bulk Upload
+                </button>
+                <button data-testid="save-productivity-btn" id="saveProductivityBtn" class="btn-success">
+                  <i class="fas fa-save"></i>
+                  Save All
+                </button>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Productivity Value</th>
+                      <th>Rate ($)</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="productivityTableBody">
+                    <!-- Productivity mappings will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Master Database Tab -->
+        <div id="master-tab" class="tab-content hidden p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Master Database</h2>
+              <div class="flex gap-3">
+                <button data-testid="refresh-master-btn" id="refreshMasterBtn" class="btn-secondary">
+                  <i class="fas fa-sync-alt"></i>
+                  Refresh
+                </button>
+                <button data-testid="export-master-btn" id="exportMasterBtn" class="btn-success">
+                  <i class="fas fa-download"></i>
+                  Export View
+                </button>
+              </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Project</label>
+                <select data-testid="master-project-filter" id="masterProjectFilter" class="input-field">
+                  <option value="">All Projects</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Resource</label>
+                <select data-testid="master-resource-filter" id="masterResourceFilter" class="input-field">
+                  <option value="">All Resources</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Min Rate ($)</label>
+                <input data-testid="master-min-rate" type="number" id="masterMinRate" class="input-field" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Max Rate ($)</label>
+                <input data-testid="master-max-rate" type="number" id="masterMaxRate" class="input-field" placeholder="1000">
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Resource</th>
+                      <th>Productivity</th>
+                      <th>Rate ($)</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="masterTableBody">
+                    <!-- Master data will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Calculator Tab -->
+        <div id="calculator-tab" class="tab-content hidden p-6">
+          <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Calculator</h2>
+              <button data-testid="export-calculator-history-btn" id="exportCalculatorHistoryBtn" class="btn-success">
+                <i class="fas fa-download"></i>
+                Export History
+              </button>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+              <!-- Calculator Form -->
+              <div class="card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Calculate Cost</h3>
+                <form id="calculatorForm" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Project</label>
+                    <select data-testid="calc-project-select" id="calcProjectSelect" class="input-field" required>
+                      <option value="">Select Project</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Resource</label>
+                    <select data-testid="calc-resource-select" id="calcResourceSelect" class="input-field" required>
+                      <option value="">Select Resource</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Productivity Level</label>
+                    <select data-testid="calc-productivity-select" id="calcProductivitySelect" class="input-field" required>
+                      <option value="">Select Productivity</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Transactions</label>
+                    <input data-testid="calc-transactions-input" type="number" id="calcTransactions" class="input-field" min="1" step="1" required>
+                  </div>
+                  
+                  <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="text-sm font-medium text-gray-700">Rate:</span>
+                      <span data-testid="calc-rate-display" id="calcRateDisplay" class="text-lg font-semibold text-primary">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm font-medium text-gray-700">Total:</span>
+                      <span data-testid="calc-total-display" id="calcTotalDisplay" class="text-xl font-bold text-success">$0.00</span>
+                    </div>
+                  </div>
+                  
+                  <div class="flex gap-3">
+                    <button data-testid="calc-calculate-btn" type="button" id="calculateBtn" class="btn-primary flex-1">
+                      <i class="fas fa-calculator"></i>
+                      Calculate
+                    </button>
+                    <button data-testid="calc-clear-btn" type="button" id="clearCalculatorBtn" class="btn-secondary">
+                      <i class="fas fa-eraser"></i>
+                      Clear
+                    </button>
+                    <button data-testid="calc-save-btn" type="button" id="saveCalculationBtn" class="btn-success">
+                      <i class="fas fa-save"></i>
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <!-- Calculation History -->
+              <div class="card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Calculations</h3>
+                <div class="overflow-y-auto max-h-96 hide-scrollbar">
+                  <div id="calculatorHistory" class="space-y-3">
+                    <!-- History items will be loaded here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+    <!-- Toast notifications will appear here -->
+  </div>
+  
+  <!-- Modal Container -->
+  <div id="modalContainer" class="hidden">
+    <!-- Modals will be inserted here -->
+  </div>
+  
+  <!-- Scripts -->
+  <script type="module" src="js/csvManager.js"></script>
+  <script type="module" src="js/stateManager.js"></script>
+  <script type="module" src="js/uiManager.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
